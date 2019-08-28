@@ -1,6 +1,6 @@
 //
-//modified by:
-//date:
+//modified by: Gracelove Simons
+//date: 8/27/19
 //
 //3350 Spring 2019 Lab-1
 //This program demonstrates the use of OpenGL and XWindows
@@ -40,7 +40,7 @@ using namespace std;
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
-const int MAX_PARTICLES = 2;
+const int MAX_PARTICLES = 2000;
 const float GRAVITY     = 0.1;
 
 //some structures
@@ -64,7 +64,7 @@ class Global {
 public:
 	int xres, yres;
 	Shape box;
-	Particle particle;
+	Particle particle[MAX_PARTICLES];
 	int n;
 	Global();
 } g;
@@ -97,7 +97,7 @@ void render();
 //=====================================
 int main()
 {
-	srand(time(NULL));
+	srand((unsigned)time(NULL));
 	init_opengl();
 	//Main animation loop
 	int done = 0;
@@ -217,11 +217,11 @@ void makeParticle(int x, int y)
 		return;
 	cout << "makeParticle() " << x << " " << y << endl;
 	//set position of particle
-	Particle *p = &g.particle;
+	Particle *p = &g.particle[g.n];
 	p->s.center.x = x;
 	p->s.center.y = y;
-	p->velocity.y = -4.0;
-	p->velocity.x =  1.0;
+	p->velocity.y = ((double)rand() / (double)RAND_MAX) - 0.5;
+	p->velocity.x = ((double)rand() / (double)RAND_MAX) -0.5 + 0.25;
 	++g.n;
 }
 
@@ -245,6 +245,8 @@ void check_mouse(XEvent *e)
 		if (e->xbutton.button==1) {
 			//Left button was pressed.
 			int y = g.yres - e->xbutton.y;
+			makeParticle(e->xbutton.x, y);
+			makeParticle(e->xbutton.x, y);
 			makeParticle(e->xbutton.x, y);
 			return;
 		}
@@ -290,20 +292,27 @@ void movement()
 {
 	if (g.n <= 0)
 		return;
-	Particle *p = &g.particle;
-	p->s.center.x += p->velocity.x;
-	p->s.center.y += p->velocity.y;
+	for (int i=0; i<g.n; i++){
+		Particle *p = &g.particle[i];
+		p->s.center.x += p->velocity.x;
+		p->s.center.y += p->velocity.y;
+    		p->velocity.y -= GRAVITY;
 
-	//check for collision with shapes...
-	//Shape *s;
+		//check for collision with shapes...
+		Shape *s = &g.box;
+    		if (p->s.center.y < s->center.y - s->height &&
+			p->s.center.x > s->center.x - s->width && 
+			p->s.center.x < s->center.x + s->width)
+        		p->velocity.y = -(p->velocity.y * 0.8);
+    
 
 
-
-
-	//check for off-screen
-	if (p->s.center.y < 0.0) {
-		cout << "off screen" << endl;
-		g.n = 0;
+		//check for off-screen
+		if (p->s.center.y < 0.0) {
+			cout << "off screen" << endl;
+			g.particle[i] = g.particle[g.n-1];
+			g.n = 0;
+		}
 	}
 }
 
@@ -329,11 +338,11 @@ void render()
 	glPopMatrix();
 	//
 	//Draw particles here
-	if (g.n > 0) {
+	for (int i=0; i<10; i++){
 		//There is at least one particle to draw.
 		glPushMatrix();
 		glColor3ub(150,160,220);
-		Vec *c = &g.particle.s.center;
+		Vec *c = &g.particle[i].s.center;
 		w = h = 2;
 		glBegin(GL_QUADS);
 			glVertex2i(c->x-w, c->y-h);
