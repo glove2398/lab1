@@ -309,7 +309,7 @@ void movement()
 
 		//check for off-screen
 		if (p->s.center.y < 0.0) {
-			cout << "off screen" << endl;
+			//cout << "off screen" << endl;
 			g.particle[i] = g.particle[g.n-1];
 			g.n = 0;
 		}
