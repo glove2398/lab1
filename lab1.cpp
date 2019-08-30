@@ -248,6 +248,10 @@ void check_mouse(XEvent *e)
 			makeParticle(e->xbutton.x, y);
 			makeParticle(e->xbutton.x, y);
 			makeParticle(e->xbutton.x, y);
+			makeParticle(e->xbutton.x, y);
+			makeParticle(e->xbutton.x, y);
+			makeParticle(e->xbutton.x, y);
+			makeParticle(e->xbutton.x, y);
 			return;
 		}
 		if (e->xbutton.button==3) {
@@ -296,13 +300,14 @@ void movement()
 		Particle *p = &g.particle[i];
 		p->s.center.x += p->velocity.x;
 		p->s.center.y += p->velocity.y;
-    		p->velocity.y -= GRAVITY;
+    	p->velocity.y -= GRAVITY;
 
 		//check for collision with shapes...
 		Shape *s = &g.box;
-    		if (p->s.center.y < s->center.y - s->height &&
+    		if (p->s.center.y < s->center.y + s->height &&
 			p->s.center.x > s->center.x - s->width && 
-			p->s.center.x < s->center.x + s->width)
+			p->s.center.x < s->center.x + s->width && 
+            p->s.center.y > s->center.y - s->height)
         		p->velocity.y = -(p->velocity.y * 0.8);
     
 
